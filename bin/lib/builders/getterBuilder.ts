@@ -13,7 +13,7 @@ export function getterBuilder(isAnId: boolean, opts: { openApiPathContent?: any,
 
   if(isAnId) {
     return `
-  id = (id: ${idType}) => {
+  id = (id: ${idType === 'integer' ? 'number' : idType}) => {
     return new ${firstLetterUpperCase(fileName)}(this.client, this, id);
   }`
   }

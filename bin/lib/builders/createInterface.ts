@@ -1,5 +1,19 @@
 import _ from "lodash"
 
+
+export function createInterfaceFromFormDataSchema(opts: { schema?: any, interfaceName: string, fullPath: string }): string {
+  const schema = opts.schema
+
+  if(!schema) {
+    return ''
+  }
+
+  const content = createFromType({ schema, newInterfaces: [] })
+  return `
+export type ${opts.interfaceName} = ${content.value}
+`
+}
+
 export function createInterface(opts: { schemas?: any, interfaceName: string, fullPath: string }): string {
   const schema = opts.schemas[opts.fullPath]
 
@@ -30,6 +44,10 @@ function createFromType(opts: { schema: any, newInterfaces: string[] }): { value
 
   if(type === 'object') {
     return createFromObject(opts)
+  }
+
+  if(type === 'string' && opts.schema.format === 'binary') {
+    return createFromFile(opts)
   }
 
   if(type === 'string' && opts.schema.enum) {
@@ -101,6 +119,10 @@ function createFromEnum(opts: { schema: any, newInterfaces: string[] }) {
 
 function createFromString(opts: { schema: any, newInterfaces: string[] }) {
   return { value: 'string', newInterfaces: opts.newInterfaces }
+}
+
+function createFromFile(opts: { schema: any, newInterfaces: string[] }) {
+  return { value: 'File', newInterfaces: opts.newInterfaces }
 }
 
 function createFromInteger(opts: { schema: any, newInterfaces: string[] }) {

@@ -1,7 +1,8 @@
 import { getContentStatus200Schema } from "../getContentStatus200Schema"
 import { getRequestBody } from "../getRequestBody"
 import fs from "fs";
-import { createInterface } from "./createInterface";
+import { createInterface, createInterfaceFromFormDataSchema } from "./createInterface";
+import { getFormData } from "../getFormData";
 
 export function createEndpointImports(opts: { openApiPathContent: any, folderPath: string, schemas: any }) {
   const entries = Object.entries(opts.openApiPathContent)
@@ -11,7 +12,7 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
     fs.mkdirSync(opts.folderPath + '/abstractions');
   }
 
-  return entries.map(([_, methodOpts]: [string, any]) => {
+  return entries.map(([method, methodOpts]: [string, any]) => {
     const { 
       interfaceName: resInterfaceName,
       fullPath: resFullPath,
@@ -24,6 +25,10 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
       thereIsRequestBodySchema,
     } = getRequestBody(methodOpts) 
 
+    const {
+      thereIsAFormData
+    } = getFormData(methodOpts)
+
     const folderResPathExists = fs.existsSync(opts.folderPath + '/abstractions/res');
     const folderReqPathExists = fs.existsSync(opts.folderPath + '/abstractions/req');
 
@@ -31,7 +36,7 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
       fs.mkdirSync(opts.folderPath + '/abstractions/res');
     }
 
-    if(!folderReqPathExists && thereIsRequestBodySchema) {
+    if(!folderReqPathExists && (thereIsRequestBodySchema || thereIsAFormData)) {
       fs.mkdirSync(opts.folderPath + '/abstractions/req');
     }
     
@@ -63,9 +68,30 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
       );
     }
 
+    const methodPrep = method.charAt(0).toUpperCase() + method.slice(1)
+    const formDataInterfaceName = `${methodPrep}FormData`
+
+    if(thereIsAFormData) {
+      const content = createInterfaceFromFormDataSchema({
+        interfaceName: formDataInterfaceName,
+        fullPath: reqFullPath,
+        schema: methodOpts
+          .requestBody
+          ?.content?.['multipart/form-data']
+          ?.schema
+      })
+
+      fs.writeFileSync(
+        opts.folderPath + `/abstractions/req/${formDataInterfaceName}.ts`,
+        content,
+        "utf-8"
+      );
+    }
+
     return [
       thereIsContentStatus200Schema && `import type { ${resInterfaceName} } from "./abstractions/res/${resInterfaceName}"`,
       thereIsRequestBodySchema && `import type { ${reqInterfaceName} } from "./abstractions/req/${reqInterfaceName}"`,
+      thereIsAFormData && `import type { ${formDataInterfaceName} } from "./abstractions/req/${formDataInterfaceName}"`,
     ]
       .filter(Boolean)
       .join('\n')
