@@ -123,7 +123,13 @@ function createFromEnum(opts: { schema: any, newInterfaces: string[] }) {
 }
 
 function createFromString(opts: { schema: any, newInterfaces: string[] }) {
-  return { value: 'string', newInterfaces: opts.newInterfaces }
+  const format = opts.schema.format ? `//Format ${opts.schema.format}` : ''
+  const maxLength = opts.schema.maxLength ? `//Max length ${opts.schema.maxLength}` : ''
+  const minLength = opts.schema.minLength ? `//Min length ${opts.schema.minLength}` : ''
+
+  const comment = ` ${format} ${maxLength} ${minLength}`
+
+  return { value: `string ${comment}`, newInterfaces: opts.newInterfaces }
 }
 
 function createFromFile(opts: { schema: any, newInterfaces: string[] }) {
