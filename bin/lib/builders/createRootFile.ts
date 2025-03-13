@@ -10,15 +10,17 @@ export const createRootFile = (opts: { name: string }) => {
   const mainFileName = toCamelCase(opts.name);
   const newFilePath = path.join(ROOT, `${mainFileName}.ts`);
 
-  const fileContent = `//IMPORTS
+  const fileContent = `//#region IMPORTS
 import { ApiBase } from "@webion/api";
+//#endregion
 
 export class ${firstLetterUpperCase(mainFileName)} extends ApiBase {
   get url() {
     return '';
   }
 
-  //SUB-PATHS
+  //#region SUB-PATHS
+  //#endregion
 }`;
 
   fs.writeFileSync(newFilePath, fileContent, "utf-8");

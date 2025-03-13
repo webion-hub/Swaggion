@@ -93,9 +93,21 @@ function createFromObject(opts: { schema: any, newInterfaces: string[] }) {
     const val = createFromType({ schema: value, newInterfaces: opts.newInterfaces })
     const isNullableValue = isNullable(value)
 
+    const schema = value as any
+
+    const format = schema.format ? `Format ${schema.format}` : ''
+    const maxLength = schema.maxLength ? `Max length ${schema.maxLength}` : ''
+    const minLength = schema.minLength ? `Min length ${schema.minLength}` : ''
+  
+    const comment = [format, maxLength, minLength]
+      .filter(x => x)
+      .join(', ')
+
+    const jsDoc = comment ? `\t/** ${comment} */\n` : ''
+
     return {
       value: 
-`  readonly ${key}${isNullableValue ? '?' : ''}: ${val.value}`,
+`${jsDoc}\treadonly ${key}${isNullableValue ? '?' : ''}: ${val.value}`,
       newInterfaces: val.newInterfaces
     }
   })
@@ -123,13 +135,7 @@ function createFromEnum(opts: { schema: any, newInterfaces: string[] }) {
 }
 
 function createFromString(opts: { schema: any, newInterfaces: string[] }) {
-  const format = opts.schema.format ? `//Format ${opts.schema.format} ` : ''
-  const maxLength = opts.schema.maxLength ? `//Max length ${opts.schema.maxLength} ` : ''
-  const minLength = opts.schema.minLength ? `//Min length ${opts.schema.minLength} ` : ''
-
-  const comment = ` ${format}${maxLength}${minLength}`
-
-  return { value: `string${comment}`, newInterfaces: opts.newInterfaces }
+  return { value: `string`, newInterfaces: opts.newInterfaces }
 }
 
 function createFromFile(opts: { schema: any, newInterfaces: string[] }) {

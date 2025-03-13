@@ -86,21 +86,25 @@ program
 
                 tryCreateFile(filePath, {
                   onCreate: () => {
-                    return `//IMPORTS
+                    return `//#region IMPORTS
 import { Endpoint } from "@webion/api";
 import type { AxiosInstance } from "axios"
+//#endregion
 
-//CLASS DEFINITION
 export class ${firstLetterUpperCase(folderName)} extends Endpoint {
-  //CONSTRUCTOR
+  //#region CONSTRUCTOR
   ${constructorBuilder(isAnId, { openApiPathContent })}
+  //#endregion
 
-  //URL
+  //#region URL
   ${urlBuilder(isAnId, { path: rawPartialPath })}
+  //#endregion
 
-  //SUB-PATHS
+  //#region SUB-PATHS
+  //#endregion
 
-  //ENDPOINTS
+  //#region ENDPOINTS
+  //#endregion
 }
                     `
                   },

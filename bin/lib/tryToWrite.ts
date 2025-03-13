@@ -7,7 +7,7 @@ export function tryToWrite(place: string, oldContent: string, newContent: string
 
   return oldContent
     .replace(
-`//${place}`, 
-`//${place}${newContent}`
+`//#region ${place}`, 
+`//#region ${place}${newContent}`
     )
 }

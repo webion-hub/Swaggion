@@ -34,38 +34,50 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
       : ''
 
     const endpointUrl = ['', ...opts.rawPartialPath].join('/')
-      
+    
+    const comment = [methodOpts.summary, methodOpts.description]
+      .filter(x => x)  
+      .join(' -- ')
+
+    
+
+    const jsDoc = 
+  `/**
+   * ${method.toUpperCase()} ${endpointUrl}
+   * @description ${comment}
+   */`
+
     /* ------------ APPLICATION JSON ------------ */ 
 
     if(method === 'get') {
       const params = thereIsRequestBodySchema ? `, { params: req }` : ''
 
       return `
-  //GET ${endpointUrl}
+  ${jsDoc}
   get = (${req}) => this.client.get${res}(this.url${params})`
     }
 
     if(method === 'post' && !thereIsAFormData) {
       return `
-  //POST ${endpointUrl}
+  ${jsDoc}
   post = (${req}) => this.client.post${res}(this.url${reqBody})`
     }
 
     if(method === 'put' && !thereIsAFormData) {
       return `
-  //PUT ${endpointUrl}
+  ${jsDoc}
   put = (${req}) => this.client.put${res}(this.url${reqBody})`
     }
 
     if(method === 'patch' && !thereIsAFormData) {
       return `
-  //PATCH ${endpointUrl}
+  ${jsDoc}
   patch = (${req}) => this.client.patch${res}(this.url${reqBody})`
     }
 
     if(method === 'delete') {
       return `
-  //DELETE ${endpointUrl}
+  ${jsDoc}
   delete = (${req}) => this.client.delete${res}(this.url${reqBody})`
     }
 
@@ -73,7 +85,7 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
 
     if(method === 'post' && thereIsAFormData) {
       return `
-  //POST ${endpointUrl}
+  ${jsDoc}
   post = (req: PostFormData) => {
     ${formDataCode}
     return this.client.post${res}(this.url, formData)
@@ -82,7 +94,7 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
 
     if(method === 'put' && thereIsAFormData) {
       return `
-  //PUT ${endpointUrl}
+  ${jsDoc}
   put = (req: PutFormData) => {
     ${formDataCode}
     return this.client.put${res}(this.url, formData)
@@ -91,14 +103,12 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
 
     if(method === 'patch' && thereIsAFormData) {
       return `
-  //PATCH ${endpointUrl}
+  ${jsDoc}
   patch = (req: PatchFormData) => {
     ${formDataCode}
     return this.client.patch${res}(this.url$, formData)
   }`
     }
-
-
   })
   .join('\n')
 }
