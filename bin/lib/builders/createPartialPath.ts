@@ -8,7 +8,6 @@ import { createEndpoints } from "./createEndpoints";
 import { createEndpointImports } from "./createEndpointImports";
 
 export function createPartialPath(opts: {
-  isLast: boolean;
   paths: string[];
   root: string[];
   schemas: any;
@@ -29,7 +28,7 @@ export function createPartialPath(opts: {
     const fileContent = 
 `import { Endpoint } from "@webion/api";
 import type { AxiosInstance } from 'axios';
-${opts.isLast ? createEndpointImports({ openApiPathContent: opts.openApiPathContent, folderPath, schemas: opts.schemas }) : ''}
+${createEndpointImports({ openApiPathContent: opts.openApiPathContent, folderPath, schemas: opts.schemas })}
 
 export class ${firstLetterUpperCase(folderName)} extends Endpoint {
   ${isAnId ? (getIdPieces({}).constructor) : `
