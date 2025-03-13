@@ -5,7 +5,11 @@ import { createInterface } from "./createInterface";
 
 export function createEndpointImports(opts: { openApiPathContent: any, folderPath: string, schemas: any }) {
   const entries = Object.entries(opts.openApiPathContent)
-  fs.mkdirSync(opts.folderPath + '/abstractions');
+  const abstractionsExist = fs.existsSync(opts.folderPath + '/abstractions');
+  
+  if(!abstractionsExist) {
+    fs.mkdirSync(opts.folderPath + '/abstractions');
+  }
 
   return entries.map(([_, methodOpts]: [string, any]) => {
     const { 
