@@ -39,6 +39,10 @@ ${newInterfaces}
 `
 }
 
+function isNullable(schema: any) {
+  return schema.nullable === true
+}
+
 function createFromType(opts: { schema: any, newInterfaces: string[] }): { value: string, newInterfaces: string[] } {
   const type = opts.schema.type
 
@@ -87,10 +91,11 @@ function createFromObject(opts: { schema: any, newInterfaces: string[] }) {
 
   const content = entries.map(([key, value]) => {
     const val = createFromType({ schema: value, newInterfaces: opts.newInterfaces })
+    const isNullableValue = isNullable(value)
 
     return {
       value: 
-`  readonly ${key}: ${val.value}`,
+`  readonly ${key}${isNullableValue ? '?' : ''}: ${val.value}`,
       newInterfaces: val.newInterfaces
     }
   })
