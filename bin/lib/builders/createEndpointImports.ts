@@ -62,7 +62,9 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
     return [
       thereIsContentStatus200Schema && `import type { ${resInterfaceName} } from "./abstractions/res/${resInterfaceName}"`,
       thereIsRequestBodySchema && `import type { ${reqInterfaceName} } from "./abstractions/req/${reqInterfaceName}"`,
-    ].filter(Boolean).join('\n')
+    ]
+      .filter(Boolean)
+      .join('\n')
   })
   .join('\n')
 }

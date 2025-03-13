@@ -1,10 +1,18 @@
 import { program } from "commander";
 import fs from "fs";
 import path from "path";
-import { createPartialPath } from "./lib/builders/createPartialPath";
+import { createEndpointImports } from "./lib/builders/createEndpointImports";
+import { createEndpoints } from "./lib/builders/createEndpoints";
 import { createRootFile } from "./lib/builders/createRootFile";
-import { fillFile } from "./lib/builders/fillFile";
 import { ROOT } from "./lib/data";
+import { firstLetterUpperCase } from "./lib/firstLetterUpperCase";
+import { getPathName } from "./lib/getPathName";
+import { tryToWrite } from "./lib/tryToWrite";
+import { tryCreateFile } from "./tryCreateFile";
+import { constructorBuilder } from "./lib/builders/constructorBuilder";
+import { urlBuilder } from "./lib/builders/urlBuilder";
+import { importsBuilder } from "./lib/builders/importsBuilder";
+import { getterBuilder } from "./lib/builders/getterBuilder";
 
 program
   .version("1.0.0")
@@ -37,26 +45,95 @@ program
           .forEach(([apiPath, openApiPathContent]) => {
             const splittedPath = apiPath
               .split("/")
-              .filter(Boolean);
+              .filter(Boolean)
 
             splittedPath
               .forEach((_, index) => {
                 const isFirst = index === 0;
-                const partialPath = splittedPath.slice(index);
-                const initialPartialPath = splittedPath.slice(0, index);
 
-                const root = [ROOT].concat(initialPartialPath);
-
-                if (isFirst) {
-                  fillFile(rootPath, splittedPath[0]);
-                }
+                const rawPartialPath = splittedPath.slice(0, index + 1);
+                const partialPath = getPathName(rawPartialPath)
+                const fullPartialPath = [ROOT, ...partialPath].join("/");
                 
-                createPartialPath({
-                  paths: partialPath,
-                  root: root,
-                  openApiPathContent,
-                  schemas: openapi.components?.schemas,
-                });
+                const folderPathExists = fs.existsSync(fullPartialPath);
+
+                if(!folderPathExists) {
+                  fs.mkdirSync(fullPartialPath);
+                }
+
+                const folderName = getPathName([[...partialPath]?.pop() ?? ''])[0];
+                const fileName = `${firstLetterUpperCase(folderName)}.ts`;
+                const filePath = path.join(fullPartialPath, fileName);
+
+                const isAnId = !!([...rawPartialPath].pop()?.includes("{"));
+                const nextPart = splittedPath[index + 1];
+                const isNextAnId = !!nextPart?.includes("{");
+                
+                if (isFirst) {
+                  tryCreateFile(rootPath, {
+                    onWrite: (oldContent) => {
+                      const part = splittedPath[index];
+                      const isAnId = !!part?.includes("{");
+
+
+                      const contentWithImports = tryToWrite('IMPORTS', oldContent, importsBuilder({ part: part }))
+                      const contentWithGetters = tryToWrite('SUB-PATHS', contentWithImports, getterBuilder(isAnId, { part: part, openApiPathContent }))
+
+                      return contentWithGetters
+                    }
+                  });
+                }
+
+                tryCreateFile(filePath, {
+                  onCreate: () => {
+                    return `//IMPORTS
+import { Endpoint } from "@webion/api";
+import type { AxiosInstance } from 'axios'
+
+//CLASS DEFINITION
+export class ${firstLetterUpperCase(folderName)} extends Endpoint {
+  //CONSTRUCTOR
+  ${constructorBuilder(isAnId, { openApiPathContent })}
+
+  //URL
+  ${urlBuilder(isAnId, { path: rawPartialPath })}
+
+  //SUB-PATHS
+
+  //ENDPOINTS
+}
+                    `
+                  },
+                  onWrite: (oldContent) => {
+                    const currentPath = getPathName(apiPath.split('/')).join("/");
+                    const iteratedPath = partialPath.join("/");
+
+                    if(currentPath === iteratedPath) {
+                      const contentWithImports = tryToWrite(
+                          'IMPORTS', 
+                          oldContent, 
+                          '\n' + createEndpointImports({ 
+                            openApiPathContent: openApiPathContent, 
+                            folderPath: fullPartialPath, 
+                            schemas: openapi.components?.schemas
+                          })
+                        )
+
+                      const conentWithEndpoints = tryToWrite(
+                          'ENDPOINTS',
+                          contentWithImports,
+                          createEndpoints({ openApiPathContent })
+                        )
+
+                      return conentWithEndpoints;
+                    }
+
+                    const contentWithImports = tryToWrite('IMPORTS', oldContent, importsBuilder({ part: nextPart }))
+                    const contentWithGetters = tryToWrite('SUB-PATHS', contentWithImports, getterBuilder(isNextAnId, { part: nextPart, openApiPathContent }))
+
+                    return contentWithGetters
+                  }
+                })
               })
 
           });
