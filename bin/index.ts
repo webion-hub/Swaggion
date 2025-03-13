@@ -88,7 +88,7 @@ program
                   onCreate: () => {
                     return `//IMPORTS
 import { Endpoint } from "@webion/api";
-import type { AxiosInstance } from 'axios'
+import type { AxiosInstance } from "axios"
 
 //CLASS DEFINITION
 export class ${firstLetterUpperCase(folderName)} extends Endpoint {
