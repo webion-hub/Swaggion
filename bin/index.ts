@@ -52,6 +52,7 @@ program
                 }
                 
                 createPartialPath({
+                  isLast: index === splittedPath.length - 1,
                   paths: partialPath,
                   root: root,
                   openApiPathContent,

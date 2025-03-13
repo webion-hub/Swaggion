@@ -14,7 +14,7 @@ export const createRootFile = (opts: { name: string }) => {
 
   const fileContent = `import { ApiBase } from "@webion/api";
 
-class ${firstLetterUpperCase(mainFileName)} extends ApiBase {
+export class ${firstLetterUpperCase(mainFileName)} extends ApiBase {
   get url() {
     return '';
   }

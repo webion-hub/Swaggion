@@ -1,0 +1,516 @@
+{
+	"openapi": "3.0.1",
+	"info": {
+		"title": "OmniaApi",
+		"version": "1.0"
+	},
+	"paths": {
+		"/agents/{agentId}/servers": {
+			"get": {
+				"tags": ["Agents"],
+				"parameters": [
+					{
+						"name": "agentId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/GetAllAgentServersResponse"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GetAllAgentServersResponse"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GetAllAgentServersResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/agents/{agentId}/logs": {
+			"get": {
+				"tags": ["Agents"],
+				"parameters": [
+					{
+						"name": "agentId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "PageSize",
+						"in": "query",
+						"schema": {
+							"type": "integer",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "Query",
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/GetAllAgentLogsResponse"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GetAllAgentLogsResponse"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GetAllAgentLogsResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/agents": {
+			"get": {
+				"tags": ["Agents"],
+				"parameters": [
+					{
+						"name": "Query",
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "Online",
+						"in": "query",
+						"schema": {
+							"type": "boolean"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/GetAllAgentsResponse"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GetAllAgentsResponse"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GetAllAgentsResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/agents/{agentId}": {
+			"get": {
+				"tags": ["Agents"],
+				"parameters": [
+					{
+						"name": "agentId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/GetAgentsResponse"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GetAgentsResponse"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GetAgentsResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/login": {
+			"post": {
+				"tags": ["Auth"],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LoginRequest"
+							}
+						},
+						"text/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LoginRequest"
+							}
+						},
+						"application/*+json": {
+							"schema": {
+								"$ref": "#/components/schemas/LoginRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/LoginResponse"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/LoginResponse"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/LoginResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/servers/{publicId}/web-access": {
+			"get": {
+				"tags": ["Servers"],
+				"parameters": [
+					{
+						"name": "publicId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/GetServerAccessResponse"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GetServerAccessResponse"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GetServerAccessResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"AgentLocation": {
+				"required": ["address", "latitude", "longitude"],
+				"type": "object",
+				"properties": {
+					"address": {
+						"type": "string",
+						"nullable": true
+					},
+					"latitude": {
+						"type": "string",
+						"nullable": true
+					},
+					"longitude": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"GetAgentsResponse": {
+				"required": [
+					"description",
+					"deviceId",
+					"location",
+					"name",
+					"online",
+					"publicId"
+				],
+				"type": "object",
+				"properties": {
+					"publicId": {
+						"type": "string",
+						"nullable": true
+					},
+					"name": {
+						"type": "string",
+						"nullable": true
+					},
+					"deviceId": {
+						"type": "string",
+						"nullable": true
+					},
+					"location": {
+						"$ref": "#/components/schemas/AgentLocation"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"online": {
+						"type": "boolean"
+					}
+				},
+				"additionalProperties": false
+			},
+			"GetAllAgentLogsResponse": {
+				"type": "object",
+				"properties": {
+					"logs": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/UserLogEntry"
+						},
+						"nullable": true
+					},
+					"moreAfter": {
+						"type": "boolean"
+					}
+				},
+				"additionalProperties": false
+			},
+			"GetAllAgentServersItem": {
+				"required": [
+					"name",
+					"publicId",
+					"type",
+					"visibleInMobileApp",
+					"visibleOnWeb"
+				],
+				"type": "object",
+				"properties": {
+					"publicId": {
+						"type": "string",
+						"nullable": true
+					},
+					"name": {
+						"type": "string",
+						"nullable": true
+					},
+					"type": {
+						"type": "string",
+						"nullable": true
+					},
+					"visibleOnWeb": {
+						"type": "boolean"
+					},
+					"visibleInMobileApp": {
+						"type": "boolean"
+					}
+				},
+				"additionalProperties": false
+			},
+			"GetAllAgentServersResponse": {
+				"required": ["servers"],
+				"type": "object",
+				"properties": {
+					"servers": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/GetAllAgentServersItem"
+						},
+						"nullable": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"GetAllAgentsItem": {
+				"required": [
+					"description",
+					"deviceId",
+					"location",
+					"name",
+					"online",
+					"publicId"
+				],
+				"type": "object",
+				"properties": {
+					"publicId": {
+						"type": "string",
+						"nullable": true
+					},
+					"name": {
+						"type": "string",
+						"nullable": true
+					},
+					"deviceId": {
+						"type": "string",
+						"nullable": true
+					},
+					"location": {
+						"$ref": "#/components/schemas/AgentLocation"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"online": {
+						"type": "boolean"
+					}
+				},
+				"additionalProperties": false
+			},
+			"GetAllAgentsResponse": {
+				"required": ["agents"],
+				"type": "object",
+				"properties": {
+					"agents": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/GetAllAgentsItem"
+						},
+						"nullable": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"GetServerAccessResponse": {
+				"required": ["url"],
+				"type": "object",
+				"properties": {
+					"url": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"LoginRequest": {
+				"required": ["clientId", "clientSecret", "password", "username"],
+				"type": "object",
+				"properties": {
+					"username": {
+						"minLength": 1,
+						"type": "string"
+					},
+					"password": {
+						"minLength": 1,
+						"type": "string"
+					},
+					"clientId": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"clientSecret": {
+						"minLength": 1,
+						"type": "string"
+					}
+				},
+				"additionalProperties": false
+			},
+			"LoginResponse": {
+				"required": ["accessToken", "refreshToken"],
+				"type": "object",
+				"properties": {
+					"accessToken": {
+						"type": "string",
+						"nullable": true
+					},
+					"refreshToken": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"UserLogEntry": {
+				"type": "object",
+				"properties": {
+					"user": {
+						"type": "string",
+						"nullable": true
+					},
+					"connectionTimestamp": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
+					"action": {
+						"type": "string",
+						"nullable": true
+					},
+					"durationSeconds": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {
+			"Authorization": {
+				"type": "apiKey",
+				"name": "Authorization",
+				"in": "header"
+			}
+		}
+	},
+	"security": [
+		{
+			"Authorization": []
+		}
+	]
+}
