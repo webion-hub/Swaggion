@@ -122,7 +122,7 @@ export class ${firstLetterUpperCase(folderName)} extends Endpoint {
                       const conentWithEndpoints = tryToWrite(
                           'ENDPOINTS',
                           contentWithImports,
-                          createEndpoints({ openApiPathContent })
+                          createEndpoints({ openApiPathContent, rawPartialPath })
                         )
 
                       return conentWithEndpoints;
