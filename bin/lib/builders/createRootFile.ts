@@ -12,9 +12,25 @@ export const createRootFile = (opts: { name: string }) => {
 
   const fileContent = `//#region IMPORTS
 import { ApiBase } from "@webion/api";
+import { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 //#endregion
 
 export class ${firstLetterUpperCase(mainFileName)} extends ApiBase {
+  set interceptors(interceptors: {
+    request?: (
+      config: InternalAxiosRequestConfig<any>,
+    ) => Promise<InternalAxiosRequestConfig<any>>;
+    response?: (config: AxiosResponse<any>) => Promise<AxiosResponse<any>>;
+  }) {
+    if (interceptors.request) {
+      this.client.interceptors.request.use(interceptors.request);
+    }
+
+    if (interceptors.response) {
+      this.client.interceptors.response.use(interceptors.response);
+    }
+  }
+
   get url() {
     return '';
   }
