@@ -18,6 +18,7 @@ program
   .version("1.0.0")
   .description("My Node CLI")
   .option("-f, --file <path>", "Specify a JSON file to read")
+  .option("-n, --name <name>", "Specify a JSON file to read")
   .action((options) => {
     if (options.file) {
       try {
@@ -25,14 +26,11 @@ program
         const data = fs.readFileSync(filePath, "utf-8");
         const openapi = JSON.parse(data);
 
-        const title = openapi.info?.title;
+        const openApiTitle = openapi.info?.title;
 
-        if (!title) {
-          console.error("Error: Missing 'info.title' in JSON file.");
-          process.exit(1);
-        }
-
-        const rootPath = createRootFile({ name: title });
+        const rootPath = createRootFile({ 
+          name: options.name ?? openApiTitle ?? 'Api' 
+        });
 
         const paths = openapi.paths;
         if (!paths) {
