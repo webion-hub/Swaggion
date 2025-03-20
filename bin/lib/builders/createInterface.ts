@@ -1,7 +1,37 @@
 import _ from "lodash"
 
+export function createInterfaceFromParamsSchema(opts: { parameters?: any, interfaceName: string }): string {
+  const parameters = opts
+    .parameters
+    .filter((p: any) => p.in === 'query')
 
-export function createInterfaceFromFormDataSchema(opts: { schema?: any, interfaceName: string, fullPath: string }): string {
+  if(!(parameters.length > 0)) {
+    return ''
+  }
+
+  const parametersObj =  parameters.reduce((acc: any, p: any) => {
+    const propertyName = p.name.charAt(0).toLowerCase() + p.name.slice(1)
+
+    return {
+      ...acc,
+      [propertyName]: p.schema
+    }
+  }
+  , {})
+
+  const content = createFromType({ 
+    schema: {
+      type: 'object',
+      properties: parametersObj
+    }, 
+    newInterfaces: [] 
+  })
+  return `
+export type ${opts.interfaceName} = ${content.value}
+`
+}
+
+export function createInterfaceFromFormDataSchema(opts: { schema?: any, interfaceName: string }): string {
   const schema = opts.schema
 
   if(!schema) {

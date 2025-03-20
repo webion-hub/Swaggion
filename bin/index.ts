@@ -18,7 +18,7 @@ program
   .version("1.0.0")
   .description("My Node CLI")
   .option("-f, --file <path>", "Specify a JSON file to read")
-  .option("-n, --name <name>", "Specify a JSON file to read")
+  .option("-n, --name <name>", "Specify root file name")
   .action((options) => {
     if (options.file) {
       try {
@@ -124,7 +124,11 @@ export class ${firstLetterUpperCase(folderName)} extends Endpoint {
                       const conentWithEndpoints = tryToWrite(
                           'ENDPOINTS',
                           contentWithImports,
-                          createEndpoints({ openApiPathContent, rawPartialPath })
+                          createEndpoints({ 
+                            openApiPathContent, 
+                            rawPartialPath,
+                            folderPath: fullPartialPath 
+                          })
                         )
 
                       return conentWithEndpoints;

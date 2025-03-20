@@ -1,8 +1,9 @@
 import { getContentStatus200Schema } from "../getContentStatus200Schema"
 import { getRequestBody } from "../getRequestBody"
 import fs from "fs";
-import { createInterface, createInterfaceFromFormDataSchema } from "./createInterface";
+import { createInterface, createInterfaceFromFormDataSchema, createInterfaceFromParamsSchema } from "./createInterface";
 import { getFormData } from "../getFormData";
+import { getQueryParams } from "../getQueryParams";
 
 export function createEndpointImports(opts: { openApiPathContent: any, folderPath: string, schemas: any }) {
   const entries = Object.entries(opts.openApiPathContent)
@@ -26,8 +27,14 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
     } = getRequestBody(methodOpts) 
 
     const {
+      interfaceName: formDataInterfaceName,
       thereIsAFormData
-    } = getFormData(methodOpts)
+    } = getFormData(methodOpts, opts.folderPath, method)
+
+    const { 
+      interfaceName: queryInterfaceName,
+      thereAreQueryParams, 
+    } = getQueryParams(methodOpts, opts.folderPath, method)
 
     const folderResPathExists = fs.existsSync(opts.folderPath + '/abstractions/res');
     const folderReqPathExists = fs.existsSync(opts.folderPath + '/abstractions/req');
@@ -36,7 +43,7 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
       fs.mkdirSync(opts.folderPath + '/abstractions/res');
     }
 
-    if(!folderReqPathExists && (thereIsRequestBodySchema || thereIsAFormData)) {
+    if(!folderReqPathExists && (thereIsRequestBodySchema || thereIsAFormData || thereAreQueryParams)) {
       fs.mkdirSync(opts.folderPath + '/abstractions/req');
     }
     
@@ -68,13 +75,9 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
       );
     }
 
-    const methodPrep = method.charAt(0).toUpperCase() + method.slice(1)
-    const formDataInterfaceName = `${methodPrep}FormData`
-
     if(thereIsAFormData) {
       const content = createInterfaceFromFormDataSchema({
         interfaceName: formDataInterfaceName,
-        fullPath: reqFullPath,
         schema: methodOpts
           .requestBody
           ?.content?.['multipart/form-data']
@@ -88,7 +91,21 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
       );
     }
 
+    if(thereAreQueryParams) {
+      const content = createInterfaceFromParamsSchema({
+        interfaceName: queryInterfaceName,
+        parameters: methodOpts.parameters
+      })
+
+      fs.writeFileSync(
+        opts.folderPath + `/abstractions/req/${queryInterfaceName}.ts`,
+        content,
+        "utf-8"
+      );
+    }
+
     return [
+      thereAreQueryParams && `import type { ${queryInterfaceName} } from "./abstractions/req/${queryInterfaceName}"`,
       thereIsContentStatus200Schema && `import type { ${resInterfaceName} } from "./abstractions/res/${resInterfaceName}"`,
       thereIsRequestBodySchema && `import type { ${reqInterfaceName} } from "./abstractions/req/${reqInterfaceName}"`,
       thereIsAFormData && `import type { ${formDataInterfaceName} } from "./abstractions/req/${formDataInterfaceName}"`,

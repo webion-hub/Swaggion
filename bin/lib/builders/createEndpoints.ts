@@ -1,8 +1,9 @@
 import { getContentStatus200Schema } from "../getContentStatus200Schema"
 import { getFormData } from "../getFormData"
+import { getQueryParams } from "../getQueryParams"
 import { getRequestBody } from "../getRequestBody"
 
-export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath: string[] }) {
+export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath: string[], folderPath: string }) {
   const entries = Object.entries(opts.openApiPathContent)
 
   return entries.map(([method, methodOpts]: [string, any]) => {
@@ -16,10 +17,16 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
       thereIsRequestBodySchema, 
     } = getRequestBody(methodOpts) 
 
+    const { 
+      interfaceName: queryInterfaceName,
+      thereAreQueryParams, 
+    } = getQueryParams(methodOpts, opts.folderPath, method)
+
     const {
+      interfaceName: formDataInterfaceName,
       code: formDataCode,
       thereIsAFormData
-    } = getFormData(methodOpts)
+    } = getFormData(methodOpts, opts.folderPath, method)
 
     const res = thereIsContentStatus200Schema 
       ? `<${resInterfaceName}>` 
@@ -31,6 +38,14 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
 
     const reqBody = thereIsRequestBodySchema
       ? `, req`
+      : ''
+
+    const params = thereAreQueryParams
+      ? `params: ${queryInterfaceName}`
+      : ''  
+      
+    const paramsBody = thereAreQueryParams
+      ? `, params`
       : ''
 
     const endpointUrl = ['', ...opts.rawPartialPath].join('/')
@@ -50,11 +65,9 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
     /* ------------ APPLICATION JSON ------------ */ 
 
     if(method === 'get') {
-      const params = thereIsRequestBodySchema ? `, { params: req }` : ''
-
       return `
   ${jsDoc}
-  get = (${req}) => this.client.get${res}(this.url${params})`
+  get = (${params}) => this.client.get${res}(this.url${paramsBody})`
     }
 
     if(method === 'post' && !thereIsAFormData) {
@@ -86,7 +99,7 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
     if(method === 'post' && thereIsAFormData) {
       return `
   ${jsDoc}
-  post = (req: PostFormData) => {
+  post = (req: ${formDataInterfaceName}) => {
     ${formDataCode}
     return this.client.post${res}(this.url, formData)
   }`
@@ -95,7 +108,7 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
     if(method === 'put' && thereIsAFormData) {
       return `
   ${jsDoc}
-  put = (req: PutFormData) => {
+  put = (req: ${formDataInterfaceName}) => {
     ${formDataCode}
     return this.client.put${res}(this.url, formData)
   }`
@@ -104,7 +117,7 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
     if(method === 'patch' && thereIsAFormData) {
       return `
   ${jsDoc}
-  patch = (req: PatchFormData) => {
+  patch = (req: ${formDataInterfaceName}) => {
     ${formDataCode}
     return this.client.patch${res}(this.url$, formData)
   }`

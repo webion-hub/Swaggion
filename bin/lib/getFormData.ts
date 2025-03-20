@@ -1,4 +1,10 @@
-export function getFormData(methodOpts: any) {
+export function getFormData(methodOpts: any, folderPath: string, method: string) {
+  const folderPathPrep = folderPath
+    .replace('api', '')
+    .split('/')
+    .map((p: string) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join('')
+
   const properties = methodOpts
     .requestBody
     ?.content?.['multipart/form-data']
@@ -17,8 +23,11 @@ export function getFormData(methodOpts: any) {
     }
   `
 
+  const methodPrep = method.charAt(0).toUpperCase() + method.slice(1)
+
   return {
     code,
-    thereIsAFormData
+    thereIsAFormData,
+    interfaceName: `${folderPathPrep}${methodPrep}FormData`,
   }
 }
