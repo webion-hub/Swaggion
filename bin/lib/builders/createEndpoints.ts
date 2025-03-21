@@ -45,7 +45,7 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
       : ''  
       
     const paramsBody = thereAreQueryParams
-      ? `, params`
+      ? `, { params }`
       : ''
 
     const endpointUrl = ['', ...opts.rawPartialPath].join('/')
