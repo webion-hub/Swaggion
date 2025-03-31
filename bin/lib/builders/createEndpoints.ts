@@ -1,5 +1,6 @@
 import { getContentStatus200Schema } from "../getContentStatus200Schema"
 import { getFormData } from "../getFormData"
+import { getOptions } from "../getOptions"
 import { getQueryParams } from "../getQueryParams"
 import { getRequestBody } from "../getRequestBody"
 
@@ -28,6 +29,11 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
       thereIsAFormData
     } = getFormData(methodOpts, opts.folderPath, method)
 
+    const {
+      options, 
+      thereIsOptions
+    } = getOptions(methodOpts)
+
     const res = thereIsContentStatus200Schema 
       ? `<${resInterfaceName}>` 
       : ''
@@ -48,13 +54,16 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
       ? `, { params }`
       : ''
 
-    const endpointUrl = ['', ...opts.rawPartialPath].join('/')
+    const endpointUrl = ['', ...opts.rawPartialPath].join('/');
     
     const comment = [methodOpts.summary, methodOpts.description]
       .filter(x => x)  
       .join(' -- ')
 
     
+    const optionsString = thereIsOptions
+      ? `, ${options}`
+      : ''
 
     const jsDoc = 
   `/**
@@ -67,7 +76,7 @@ export function createEndpoints(opts: { openApiPathContent: any, rawPartialPath:
     if(method === 'get') {
       return `
   ${jsDoc}
-  get = (${params}) => this.client.get${res}(this.url${paramsBody})`
+  get = (${params}) => this.client.get${res}(this.url${paramsBody}${optionsString})`
     }
 
     if(method === 'post' && !thereIsAFormData) {
