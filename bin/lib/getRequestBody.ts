@@ -7,6 +7,7 @@ export function getRequestBody(methodOpts: any) {
 
   const thereIsRequestBodySchema = requestBodySchemaPath !== undefined
   const interfaceName = thereIsRequestBodySchema && requestBodySchemaPath
+    .replace('+', '')
     .split('.')
     .pop()
 

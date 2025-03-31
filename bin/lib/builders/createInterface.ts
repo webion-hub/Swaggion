@@ -44,14 +44,13 @@ export type ${opts.interfaceName} = ${content.value}
 `
 }
 
-export function createInterface(opts: { schemas?: any, interfaceName: string, fullPath: string }): string {
+export function createInterface(opts: { schemas?: any, interfaceName: string, fullPath: string, folderPath: string }): string {
   const schema = opts.schemas[opts.fullPath]
 
   if(!schema) {
     return ''
   }
   
-
   const content = createFromType({ schema, newInterfaces: [] })
   
   const newInterfaces = _(content.newInterfaces)
@@ -59,7 +58,8 @@ export function createInterface(opts: { schemas?: any, interfaceName: string, fu
     .map(newInterface => createInterface({ 
       schemas: opts.schemas, 
       interfaceName: newInterface.split('.').pop() ?? '', 
-      fullPath: newInterface 
+      fullPath: newInterface,
+      folderPath: opts.folderPath
     }))
     .join('\n')
 

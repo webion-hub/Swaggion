@@ -13,6 +13,7 @@ import { constructorBuilder } from "./lib/builders/constructorBuilder";
 import { urlBuilder } from "./lib/builders/urlBuilder";
 import { importsBuilder } from "./lib/builders/importsBuilder";
 import { getterBuilder } from "./lib/builders/getterBuilder";
+import _ from "lodash";
 
 program
   .version("1.0.0")
@@ -143,6 +144,7 @@ export class ${firstLetterUpperCase(folderName)} extends Endpoint {
               })
 
           });
+
       } catch (error) {
         console.error("Error reading the JSON file:", (error as any).message);
       }

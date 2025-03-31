@@ -51,7 +51,8 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
       const content = createInterface({
         interfaceName: resInterfaceName,
         schemas: opts.schemas,
-        fullPath: resFullPath
+        fullPath: resFullPath,
+        folderPath: `${opts.folderPath}/abstractions/res/${resInterfaceName}`
       })
 
       fs.writeFileSync(
@@ -65,7 +66,8 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
       const content = createInterface({
         interfaceName: reqInterfaceName,
         schemas: opts.schemas,
-        fullPath: reqFullPath
+        fullPath: reqFullPath,
+        folderPath: `${opts.folderPath}/abstractions/req/${reqInterfaceName}`
       })
 
       fs.writeFileSync(

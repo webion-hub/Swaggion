@@ -27,7 +27,7 @@ export class ${firstLetterUpperCase(mainFileName)} extends ApiBase {
     }
 
     if (interceptors.response) {
-      this.client.interceptors.response.use(interceptors.response);
+      this.client.interceptors.response.use(config => config, interceptors.response);
     }
   }
 

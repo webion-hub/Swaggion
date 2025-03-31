@@ -7,6 +7,7 @@ export function getContentStatus200Schema(methodOpts: any) {
 
   const thereIsContentStatus200Schema = contentStatus200SchemaPath !== undefined
   const interfaceName = thereIsContentStatus200Schema && contentStatus200SchemaPath
+    .replace('+', '')
     .split('.')
     .pop()
 
