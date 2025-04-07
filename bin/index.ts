@@ -30,12 +30,12 @@ program
 
         const openApiTitle = openapi.info?.title;
 
-        
+        const name = options.name ?? openApiTitle ?? 'Api' 
         const rootPath = createRootFile({ 
-          name: options.name ?? openApiTitle ?? 'Api' 
+          name: name 
         });
         
-        createAbstractions(openapi.components, ROOT)
+        createAbstractions(openapi.components, ROOT, name)
 
         const paths = openapi.paths;
         if (!paths) {

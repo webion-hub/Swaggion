@@ -10,7 +10,7 @@ function getNameFromKey(key: string) {
     ?? ''
 }
 
-export function createAbstractions(components: any, path: string) {
+export function createAbstractions(components: any, path: string, name: string) {
   const entries = Object.entries(components.schemas);
 
   const abstractions = entries
@@ -39,6 +39,6 @@ export function createAbstractions(components: any, path: string) {
   })
 
   tryCreateFile(path + '/index.ts', {
-    onCreate: () => imports
+    onCreate: () => [`export { ${name} } from \'./${name}\'`, imports].join('\n')
   })
 }
