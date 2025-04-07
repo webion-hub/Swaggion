@@ -50,7 +50,7 @@ export function createInterface(opts: { schemas?: any, interfaceName: string, fu
   if(!schema) {
     return ''
   }
-  
+
   const content = createFromType({ schema, newInterfaces: [] })
   
   const newInterfaces = _(content.newInterfaces)
@@ -116,7 +116,12 @@ function createFromType(opts: { schema: any, newInterfaces: string[] }): { value
 }
 
 function createFromObject(opts: { schema: any, newInterfaces: string[] }) {
-  const properties = opts.schema.properties
+  const properties = opts.schema?.properties
+  
+  if(!properties) {
+    return { value: 'any', newInterfaces: opts.newInterfaces }
+  }
+  
   const entries = Object.entries(properties)
 
   const content = entries.map(([key, value]) => {

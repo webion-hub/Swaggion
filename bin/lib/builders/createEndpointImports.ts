@@ -106,7 +106,8 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
       );
     }
 
-    return [
+
+  return [
       thereAreQueryParams && `import type { ${queryInterfaceName} } from "./abstractions/req/${queryInterfaceName}"`,
       thereIsContentStatus200Schema && `import type { ${resInterfaceName} } from "./abstractions/res/${resInterfaceName}"`,
       thereIsRequestBodySchema && `import type { ${reqInterfaceName} } from "./abstractions/req/${reqInterfaceName}"`,
