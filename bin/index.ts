@@ -14,6 +14,7 @@ import { urlBuilder } from "./lib/builders/urlBuilder";
 import { importsBuilder } from "./lib/builders/importsBuilder";
 import { getterBuilder } from "./lib/builders/getterBuilder";
 import _ from "lodash";
+import { createAbstractions } from "./lib/builders/createAbstractions";
 
 program
   .version("1.0.0")
@@ -29,9 +30,12 @@ program
 
         const openApiTitle = openapi.info?.title;
 
+        
         const rootPath = createRootFile({ 
           name: options.name ?? openApiTitle ?? 'Api' 
         });
+        
+        createAbstractions(openapi.components, ROOT)
 
         const paths = openapi.paths;
         if (!paths) {

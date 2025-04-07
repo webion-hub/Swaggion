@@ -4,25 +4,30 @@ import fs from "fs";
 import { createInterface, createInterfaceFromFormDataSchema, createInterfaceFromParamsSchema } from "./createInterface";
 import { getFormData } from "../getFormData";
 import { getQueryParams } from "../getQueryParams";
+import { tryCreateFile } from "../../tryCreateFile";
+import { ROOT } from "../data";
 
 export function createEndpointImports(opts: { openApiPathContent: any, folderPath: string, schemas: any }) {
   const entries = Object.entries(opts.openApiPathContent)
-  const abstractionsExist = fs.existsSync(opts.folderPath + '/abstractions');
-  
-  if(!abstractionsExist) {
-    fs.mkdirSync(opts.folderPath + '/abstractions');
-  }
+
+  const deepLevel = opts
+    .folderPath
+    .split('/')
+    .length - 1
+
+  const importPath = Array(deepLevel)
+    .fill('..')
+    .join('/')
+    + '/type'
 
   return entries.map(([method, methodOpts]: [string, any]) => {
     const { 
       interfaceName: resInterfaceName,
-      fullPath: resFullPath,
       thereIsContentStatus200Schema, 
     } = getContentStatus200Schema(methodOpts) 
 
     const { 
       interfaceName: reqInterfaceName,
-      fullPath: reqFullPath, 
       thereIsRequestBodySchema,
     } = getRequestBody(methodOpts) 
 
@@ -36,47 +41,6 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
       thereAreQueryParams, 
     } = getQueryParams(methodOpts, opts.folderPath, method)
 
-    const folderResPathExists = fs.existsSync(opts.folderPath + '/abstractions/res');
-    const folderReqPathExists = fs.existsSync(opts.folderPath + '/abstractions/req');
-
-    if(!folderResPathExists && thereIsContentStatus200Schema) {
-      fs.mkdirSync(opts.folderPath + '/abstractions/res');
-    }
-
-    if(!folderReqPathExists && (thereIsRequestBodySchema || thereIsAFormData || thereAreQueryParams)) {
-      fs.mkdirSync(opts.folderPath + '/abstractions/req');
-    }
-    
-    if(thereIsContentStatus200Schema) {
-      const content = createInterface({
-        interfaceName: resInterfaceName,
-        schemas: opts.schemas,
-        fullPath: resFullPath,
-        folderPath: `${opts.folderPath}/abstractions/res/${resInterfaceName}`
-      })
-
-      fs.writeFileSync(
-        opts.folderPath + `/abstractions/res/${resInterfaceName}.ts`,
-        content,
-        "utf-8"
-      );
-    }
-
-    if(thereIsRequestBodySchema) {
-      const content = createInterface({
-        interfaceName: reqInterfaceName,
-        schemas: opts.schemas,
-        fullPath: reqFullPath,
-        folderPath: `${opts.folderPath}/abstractions/req/${reqInterfaceName}`
-      })
-
-      fs.writeFileSync(
-        opts.folderPath + `/abstractions/req/${reqInterfaceName}.ts`,
-        content,
-        "utf-8"
-      );
-    }
-
     if(thereIsAFormData) {
       const content = createInterfaceFromFormDataSchema({
         interfaceName: formDataInterfaceName,
@@ -86,11 +50,15 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
           ?.schema
       })
 
-      fs.writeFileSync(
-        opts.folderPath + `/abstractions/req/${formDataInterfaceName}.ts`,
-        content,
-        "utf-8"
-      );
+      tryCreateFile(ROOT + '/index.ts', {
+        onCreate: () => 'export type { ' + formDataInterfaceName + ' } from \'./type\'',
+        onWrite: (old) => old + '\n' + 'export type { ' + formDataInterfaceName + ' } from \'./type\''
+      })
+
+      tryCreateFile(ROOT + '/type.ts', {
+        onCreate: () => content,
+        onWrite: (old) => old + '\n' + content
+      })
     }
 
     if(thereAreQueryParams) {
@@ -99,19 +67,23 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
         parameters: methodOpts.parameters
       })
 
-      fs.writeFileSync(
-        opts.folderPath + `/abstractions/req/${queryInterfaceName}.ts`,
-        content,
-        "utf-8"
-      );
+      tryCreateFile(ROOT + '/index.ts', {
+        onCreate: () => 'export type { ' + queryInterfaceName + ' } from \'./type\'',
+        onWrite: (old) => old + '\n' + 'export type { ' + queryInterfaceName + ' } from \'./type\''
+      })
+
+      tryCreateFile(ROOT + '/type.ts', {
+        onCreate: () => content,
+        onWrite: (old) => old + '\n' + content
+      })
     }
 
 
   return [
-      thereAreQueryParams && `import type { ${queryInterfaceName} } from "./abstractions/req/${queryInterfaceName}"`,
-      thereIsContentStatus200Schema && `import type { ${resInterfaceName} } from "./abstractions/res/${resInterfaceName}"`,
-      thereIsRequestBodySchema && `import type { ${reqInterfaceName} } from "./abstractions/req/${reqInterfaceName}"`,
-      thereIsAFormData && `import type { ${formDataInterfaceName} } from "./abstractions/req/${formDataInterfaceName}"`,
+      thereIsContentStatus200Schema && `import type { ${resInterfaceName} } from "${importPath}"`,
+      thereIsRequestBodySchema && `import type { ${reqInterfaceName} } from "${importPath}"`,
+      thereAreQueryParams && `import type { ${queryInterfaceName} } from "${importPath}"`,
+      thereIsAFormData && `import type { ${formDataInterfaceName} } from "${importPath}"`,
     ]
       .filter(Boolean)
       .join('\n')

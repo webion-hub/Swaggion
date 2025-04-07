@@ -44,7 +44,7 @@ export type ${opts.interfaceName} = ${content.value}
 `
 }
 
-export function createInterface(opts: { schemas?: any, interfaceName: string, fullPath: string, folderPath: string }): string {
+export function createInterface(opts: { schemas?: any, interfaceName: string, fullPath: string, notDeep?: boolean }): string {
   const schema = opts.schemas[opts.fullPath]
 
   if(!schema) {
@@ -59,13 +59,13 @@ export function createInterface(opts: { schemas?: any, interfaceName: string, fu
       schemas: opts.schemas, 
       interfaceName: newInterface.split('.').pop() ?? '', 
       fullPath: newInterface,
-      folderPath: opts.folderPath
+      notDeep: opts.notDeep
     }))
     .join('\n')
 
   return `
 export type ${opts.interfaceName} = ${content.value}
-${newInterfaces}
+${opts.notDeep ? '' : newInterfaces }
 `
 }
 
@@ -159,7 +159,12 @@ function createFromArray(opts: { schema: any, newInterfaces: string[] }) {
   const items = opts.schema.items
   const val = createFromType({ schema: items, newInterfaces: opts.newInterfaces })
 
-  return { value: `readonly ${val.value}[]`, newInterfaces: val.newInterfaces }
+  const name = val
+    .value
+    .replaceAll('+', '')
+    .replaceAll('-', '')
+
+  return { value: `readonly ${name}[]`, newInterfaces: val.newInterfaces }
 }
 
 function createFromEnum(opts: { schema: any, newInterfaces: string[] }) {
