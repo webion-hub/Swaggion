@@ -1,5 +1,23 @@
 import _ from "lodash"
 
+export function getEnumArrayName(name: string) {
+  return name
+    .split(/(?=[A-Z])/)
+    .map(name => name.toUpperCase())
+    .join('_')
+}
+
+export function createEnumArray(opts: { schema?: any, name: string }) {
+  const isEnum = opts.schema.type === 'string' && opts.schema.enum
+
+  if(!isEnum) {
+    return ''
+  }
+
+  const name = getEnumArrayName(opts.name)
+  return `export const ${name} = [${opts.schema.enum.map((v: any) => `'${v}'`).join(', ')}] as const`
+} 
+
 export function createInterfaceFromParamsSchema(opts: { parameters?: any, interfaceName: string }): string {
   const parameters = opts
     .parameters
@@ -24,11 +42,11 @@ export function createInterfaceFromParamsSchema(opts: { parameters?: any, interf
       type: 'object',
       properties: parametersObj
     }, 
-    newInterfaces: [] 
+    newInterfaces: [],
+    interfaceName: opts.interfaceName
   })
   return `
-export type ${opts.interfaceName} = ${content.value}
-`
+export type ${opts.interfaceName} = ${content.value}`
 }
 
 export function createInterfaceFromFormDataSchema(opts: { schema?: any, interfaceName: string }): string {
@@ -38,10 +56,10 @@ export function createInterfaceFromFormDataSchema(opts: { schema?: any, interfac
     return ''
   }
 
-  const content = createFromType({ schema, newInterfaces: [] })
+  const content = createFromType({ schema, newInterfaces: [], interfaceName: opts.interfaceName })
   return `
-export type ${opts.interfaceName} = ${content.value}
-`
+${createEnumArray({ schema: opts.schema, name: opts.interfaceName })}
+export type ${opts.interfaceName} = ${content.value}`
 }
 
 export function createInterface(opts: { schemas?: any, interfaceName: string, fullPath: string, notDeep?: boolean }): string {
@@ -51,7 +69,7 @@ export function createInterface(opts: { schemas?: any, interfaceName: string, fu
     return ''
   }
 
-  const content = createFromType({ schema, newInterfaces: [] })
+  const content = createFromType({ schema, newInterfaces: [], interfaceName: opts.interfaceName })
   
   const newInterfaces = _(content.newInterfaces)
     .uniq()
@@ -64,16 +82,16 @@ export function createInterface(opts: { schemas?: any, interfaceName: string, fu
     .join('\n')
 
   return `
+${createEnumArray({ schema: schema, name: opts.interfaceName })}
 export type ${opts.interfaceName} = ${content.value}
-${opts.notDeep ? '' : newInterfaces }
-`
+${opts.notDeep ? '' : newInterfaces }`
 }
 
 function isNullable(schema: any) {
   return schema.nullable === true
 }
 
-function createFromType(opts: { schema: any, newInterfaces: string[] }): { value: string, newInterfaces: string[] } {
+function createFromType(opts: { schema: any, interfaceName: string, newInterfaces: string[] }): { value: string, newInterfaces: string[] } {
   const type = opts.schema.type
 
   if(type === 'object') {
@@ -115,7 +133,7 @@ function createFromType(opts: { schema: any, newInterfaces: string[] }): { value
   return { value: 'any', newInterfaces: opts.newInterfaces }
 }
 
-function createFromObject(opts: { schema: any, newInterfaces: string[] }) {
+function createFromObject(opts: { schema: any, newInterfaces: string[], interfaceName: string }) {
   const properties = opts.schema?.properties
   
   if(!properties) {
@@ -125,7 +143,7 @@ function createFromObject(opts: { schema: any, newInterfaces: string[] }) {
   const entries = Object.entries(properties)
 
   const content = entries.map(([key, value]) => {
-    const val = createFromType({ schema: value, newInterfaces: opts.newInterfaces })
+    const val = createFromType({ schema: value, newInterfaces: opts.newInterfaces, interfaceName: opts.interfaceName })
     const isNullableValue = isNullable(value)
 
     const schema = value as any
@@ -155,9 +173,9 @@ ${content.map(v => v.value).join('\n')}
   }
 }
 
-function createFromArray(opts: { schema: any, newInterfaces: string[] }) {
+function createFromArray(opts: { schema: any, newInterfaces: string[], interfaceName: string }) {
   const items = opts.schema.items
-  const val = createFromType({ schema: items, newInterfaces: opts.newInterfaces })
+  const val = createFromType({ schema: items, newInterfaces: opts.newInterfaces, interfaceName: opts.interfaceName })
 
   const name = val
     .value
@@ -167,9 +185,11 @@ function createFromArray(opts: { schema: any, newInterfaces: string[] }) {
   return { value: `readonly ${name}[]`, newInterfaces: val.newInterfaces }
 }
 
-function createFromEnum(opts: { schema: any, newInterfaces: string[] }) {
+function createFromEnum(opts: { schema: any, newInterfaces: string[], interfaceName: string }) {
+  const name = getEnumArrayName(opts.interfaceName)
+  
   return { 
-    value: opts.schema.enum.map((v: any) => `'${v}'`).join(' | '), 
+    value: `typeof ${name}[number]`, 
     newInterfaces: opts.newInterfaces 
   }
 }

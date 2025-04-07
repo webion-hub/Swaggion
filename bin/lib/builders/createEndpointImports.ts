@@ -50,11 +50,6 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
           ?.schema
       })
 
-      tryCreateFile(ROOT + '/index.ts', {
-        onCreate: () => 'export type { ' + formDataInterfaceName + ' } from \'./type\'',
-        onWrite: (old) => old + '\n' + 'export type { ' + formDataInterfaceName + ' } from \'./type\''
-      })
-
       tryCreateFile(ROOT + '/type.ts', {
         onCreate: () => content,
         onWrite: (old) => old + '\n' + content
@@ -65,11 +60,6 @@ export function createEndpointImports(opts: { openApiPathContent: any, folderPat
       const content = createInterfaceFromParamsSchema({
         interfaceName: queryInterfaceName,
         parameters: methodOpts.parameters
-      })
-
-      tryCreateFile(ROOT + '/index.ts', {
-        onCreate: () => 'export type { ' + queryInterfaceName + ' } from \'./type\'',
-        onWrite: (old) => old + '\n' + 'export type { ' + queryInterfaceName + ' } from \'./type\''
       })
 
       tryCreateFile(ROOT + '/type.ts', {

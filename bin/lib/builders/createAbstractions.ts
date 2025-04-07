@@ -39,6 +39,6 @@ export function createAbstractions(components: any, path: string, name: string) 
   })
 
   tryCreateFile(path + '/index.ts', {
-    onCreate: () => [`export { ${name} } from \'./${name}\'`, imports].join('\n')
+    onCreate: () => [`export { ${name} } from \'./${name}\'`, `export type * from \'./type\'`].join('\n')
   })
 }
