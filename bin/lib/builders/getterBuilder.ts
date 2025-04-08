@@ -5,9 +5,9 @@ export function getterBuilder(isAnId: boolean, opts: { openApiPathContent?: any,
   const parameters = (Object.values(opts.openApiPathContent)?.[0] as any)?.parameters;
 
   const idType = opts.openApiPathContent 
-    ? parameters?.[parameters.length - 1]
-        ?.schema
-        ?.type
+    ? parameters.find((param: any) => param.name === opts.part.replaceAll('{', '').replaceAll('}', ''))
+      ?.schema
+      ?.type
     : 'any';
 
   const fileName = getPathName([opts.part])[0];

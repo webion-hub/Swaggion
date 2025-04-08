@@ -68,7 +68,8 @@ program
                 const fileName = `${firstLetterUpperCase(folderName)}.ts`;
                 const filePath = path.join(fullPartialPath, fileName);
 
-                const isAnId = !!([...rawPartialPath].pop()?.includes("{"));
+                const lastPart = [...rawPartialPath].pop();
+                const isAnId = !!lastPart?.includes("{");
                 const nextPart = splittedPath[index + 1];
                 const isNextAnId = !!nextPart?.includes("{");
                 
@@ -96,7 +97,7 @@ import type { AxiosInstance } from "axios"
 
 export class ${firstLetterUpperCase(folderName)} extends Endpoint {
   //#region CONSTRUCTOR
-  ${constructorBuilder(isAnId, { openApiPathContent })}
+  ${constructorBuilder(isAnId, { openApiPathContent, part: lastPart ?? '' })}
   //#endregion
 
   //#region URL
