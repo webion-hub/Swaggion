@@ -5,7 +5,7 @@ export function getterBuilder(isAnId: boolean, opts: { openApiPathContent?: any,
   const parameters = (Object.values(opts.openApiPathContent)?.[0] as any)?.parameters;
 
   const idType = opts.openApiPathContent 
-    ? parameters.find((param: any) => param.name === opts.part.replaceAll('{', '').replaceAll('}', ''))
+    ? parameters?.find((param: any) => param.name === opts.part.replaceAll('{', '').replaceAll('}', ''))
       ?.schema
       ?.type
     : 'any';
