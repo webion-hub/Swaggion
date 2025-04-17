@@ -220,7 +220,11 @@ function createFromRef(opts: { schema: any, newInterfaces: string[] }) {
     .replaceAll('#/components/schemas/', '')
 
   return { 
-    value: ref.split('.').pop(), 
+    value: ref
+      .split('.')
+      .pop()
+      .replaceAll('+', '')
+      .replaceAll('-', ''),
     newInterfaces: [...opts.newInterfaces, ref] 
   }
 }
