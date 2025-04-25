@@ -7,11 +7,15 @@ export function constructorBuilder(isAnId: boolean, opts: { openApiPathContent?:
         ?.type
     : 'any';
 
+  const type = !idType
+    ? 'any'
+    : idType
+
   return isAnId 
 ? `constructor(
     readonly client: AxiosInstance,
     readonly parent: { url: string },
-    readonly id: ${idType === 'integer' ? 'number' : idType},
+    readonly id: ${type === 'integer' ? 'number' : type},
   ) {
     super(client);
   }`
