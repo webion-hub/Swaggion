@@ -32,7 +32,10 @@ export function createInterfaceFromParamsSchema(opts: { parameters?: any, interf
 
     return {
       ...acc,
-      [propertyName]: p.schema
+      [propertyName]: {
+        ...p.schema,
+        nullable: p.required ? false : true,
+      }
     }
   }
   , {})
