@@ -16,7 +16,13 @@ export function getFormData(methodOpts: any, folderPath: string, method: string)
   
   const code = `const formData = new FormData();
     ${
-      propertiesArray.map(([key]: [string, any]) => {
+      propertiesArray.map(([key, value]: [string, any]) => {
+        if(value.type === 'array') {
+          return `req.${key}.forEach((item: any) => {
+      formData.append('${key}', item);
+    })`
+        }
+
         return `formData.append('${key}', req.${key})`
       })
       .join(',\n\t\t')
